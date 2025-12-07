@@ -4,12 +4,10 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include <iomanip> // Для красивого вывода даты
+#include <iomanip>
 
-// Точная строка для поиска
 const std::string TARGET_STRING = "EnablePrimaryMouseButtonEvents(true)";
 
-// Хелпер для конвертации времени Windows в строку
 std::string FileTimeToString(const FILETIME& ft) {
     SYSTEMTIME stUTC, stLocal;
     FileTimeToSystemTime(&ft, &stUTC);
@@ -22,11 +20,9 @@ std::string FileTimeToString(const FILETIME& ft) {
     return std::string(buffer);
 }
 
-// Проверка Prefetch (C:\Windows\Prefetch)
 void CheckPrefetch() {
     std::cout << "\n[!] Checking Prefetch for history..." << std::endl;
 
-    // Путь к префетчу
     std::wstring prefetchPath = L"C:\\Windows\\Prefetch\\LGHUB_AGENT.EXE*.pf";
 
     WIN32_FIND_DATAW findData;
@@ -36,12 +32,10 @@ void CheckPrefetch() {
         std::cout << "Prefetch traces not found. (Never run or cleared)" << std::endl;
     }
     else {
-        // Ищем самый свежий файл (если их несколько с разными хешами)
         FILETIME lastRunTime = { 0, 0 };
         bool foundAny = false;
 
         do {
-            // Сравниваем время записи (LastWriteTime обновляется при запуске программы)
             if (CompareFileTime(&findData.ftLastWriteTime, &lastRunTime) > 0) {
                 lastRunTime = findData.ftLastWriteTime;
                 foundAny = true;
@@ -57,7 +51,6 @@ void CheckPrefetch() {
     }
 }
 
-// Получение ID процесса по имени
 DWORD GetProcessIdByName(const wchar_t* processName) {
     DWORD processId = 0;
     HANDLE snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -80,27 +73,20 @@ DWORD GetProcessIdByName(const wchar_t* processName) {
 }
 
 int main() {
-    // Настройка консоли
     SetConsoleTitleW(L"LGHUB Scanner + History Check");
 
     std::cout << "Scanning..." << std::endl;
 
-    // 1. Ищем процесс
     DWORD pid = GetProcessIdByName(L"lghub_agent.exe");
 
-    // ЕСЛИ ПРОЦЕСС НЕ НАЙДЕН
     if (pid == 0) {
         std::cout << "LGHUB Agent not found (process not running)." << std::endl;
-
-        // Запускаем проверку истории (Prefetch)
         CheckPrefetch();
-
         std::cout << "\nResult: Process is dead." << std::endl;
         system("pause");
         return 0;
     }
 
-    // 2. Если процесс найден - открываем
     HANDLE hProcess = OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION, FALSE, pid);
     if (!hProcess) {
         std::cout << "Failed to open process. Run as Administrator." << std::endl;
@@ -108,7 +94,6 @@ int main() {
         return 0;
     }
 
-    // 3. Сканирование памяти
     unsigned char* addr = 0;
     MEMORY_BASIC_INFORMATION mbi;
     bool found = false;
@@ -144,7 +129,6 @@ int main() {
 
     CloseHandle(hProcess);
 
-    // 4. Вывод результата
     if (found) {
         std::cout << "Yes (ne nado igat s macrosom)" << std::endl;
     }
