@@ -73,7 +73,7 @@ DWORD GetProcessIdByName(const wchar_t* processName) {
 }
 
 int main() {
-    SetConsoleTitleW(L"LGHUB Scanner + History Check");
+    SetConsoleTitleW(L"LGHUB Scanner");
 
     std::cout << "Scanning..." << std::endl;
 
@@ -139,3 +139,4 @@ int main() {
     system("pause");
     return 0;
 }
+
